@@ -59,7 +59,7 @@ const getCart = async (req, res) => {
               SELECT 
                 item_name, 
                 price,
-                image_url, 
+                image_url
               FROM menu 
               WHERE menu.menu_id = $1
             `,
@@ -74,6 +74,7 @@ const getCart = async (req, res) => {
           user_id: item.user_id,
           menu_id: item.menu_id,
           quantity: item.quantity,
+          image_url: menuDetails?.image_url || "Unknown item",
           item_name: menuDetails?.item_name || "Unknown item",
           price: menuDetails?.price || 0,
         };

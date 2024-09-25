@@ -7,16 +7,22 @@ const getOrderHistory = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT 
-          oh.order_id,
-          oh.user_id AS order_user_id,
-          oh.checkout_id,
-          oh.order_status,
-          c.total_amount,
-          c.payment_method,
-          c.address
-        FROM OrderHistory oh
-        JOIN Checkout c ON oh.checkout_id = c.checkout_id
-        WHERE oh.user_id = $1`,
+            oh.order_id,
+            oh.user_id AS order_user_id,
+            oh.checkout_id,
+            oh.order_status,
+            oh.menu_id,
+            c.total_amount,
+            c.payment_method,
+            c.address,
+            m.item_name,
+            m.price,
+            m.image_url
+          FROM OrderHistory oh
+          JOIN Checkout c ON oh.checkout_id = c.checkout_id
+          JOIN menu m ON oh.menu_id = m.menu_id
+          WHERE oh.user_id = $1 
+          ORDER BY oh.created_at DESC`,
       [userId]
     );
 
@@ -29,12 +35,12 @@ const getOrderHistory = async (req, res) => {
 
 // Add a new order to Order History
 const addOrderHistory = async (req, res) => {
-  const { user_id, checkout_id, order_status } = req.body;
+  const { user_id, checkout_id, order_status, menu_id } = req.body;
 
   try {
     const result = await pool.query(
-      "INSERT INTO OrderHistory (user_id, checkout_id, order_status) VALUES ($1, $2, $3) RETURNING *",
-      [user_id, checkout_id, order_status]
+      "INSERT INTO OrderHistory (user_id, checkout_id, order_status, menu_id) VALUES ($1, $2, $3, $4) RETURNING *",
+      [user_id, checkout_id, order_status, menu_id]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
